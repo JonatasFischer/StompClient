@@ -12,12 +12,12 @@
  * Author: Duncan McIntyre <duncan@calligram.co.uk>
  * 
  */
-
+/* UNCOMMENT THE FOLLOWING DEFINITION TO USE SockJS */
+/*#define USE_SOCK_JS 1*/
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <WebSocketsClient.h>
+#include <ArduinoWebsockets.h>
 #include "StompClient.h"
-
 
 /**
 * WiFi settings
@@ -31,7 +31,7 @@ const char* wlan_password         = "--- Your wifi password";
 bool useWSS                       = true;
 const char* ws_host               = "--- Your Stomp server hostname ---";
 const int ws_port                 = 4443;
-const char* ws_baseurl            = "/esp-websocket/"; // don't forget leading and trailing "/" !!!
+const char* ws_baseurl            = "/esp-websocket"; // don't forget leading "/" !!!
 
 
 // Confusingly, on a NodeMCU board these correspond to D1 and D2
@@ -39,10 +39,8 @@ const char* ws_baseurl            = "/esp-websocket/"; // don't forget leading a
 #define BUTTON2 5
 
 // VARIABLES
-
-WebSocketsClient webSocket;
-
-Stomp::StompClient stomper(webSocket, ws_host, ws_port, ws_baseurl, true);
+websockets::WebsocketsClient client;
+Stomp::StompClient stomper(client, ws_host, ws_port, ws_baseurl);
 
 bool b1 = false;
 bool b1_l = false;
@@ -129,6 +127,6 @@ void buttons() {
 }
 
 void loop() {
-  webSocket.loop();
+  stomper.loop();
   buttons();
 }

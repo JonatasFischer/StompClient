@@ -11,17 +11,20 @@ class StompCommandParser {
   public:
 
     static StompCommand parse(String data) {
-
+        Serial.println("StompCommandParser::parse data => " + data);
       // command EOL
       // * (header EOL)
       // EOL
       // * Octet
       // NULL
       // * (EOL)
-
+#ifdef USE_SOCK_JS
       String EOL = "\\n";
       String EOL2 = "\\n\\n";
-
+#else
+      String EOL = "\n";
+      String EOL2 = "\n\n";
+#endif
       int headersStart = data.indexOf(EOL);
       int bodyStart = data.indexOf(EOL2);
 
@@ -49,6 +52,7 @@ class StompCommandParser {
       }
 
       headers.trim();
+      Serial.println("StompCommandParser::parse Parsed headers => " + headers);
       cmd.body.trim();
 
       String header;

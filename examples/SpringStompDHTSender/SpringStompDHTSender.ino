@@ -23,7 +23,7 @@
  */
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <WebSocketsClient.h>
+#include <ArduinoWebsockets.h>
 #include "StompClient.h"
 #include "DHT.h"
 
@@ -43,7 +43,7 @@ const char* wlan_password         = "--- Your wifi password";
 bool useWSS                       = true;
 const char* ws_host               = "--- Your Stomp server hostname ---";
 const int ws_port                 = 4443;
-const char* ws_baseurl            = "/esp-websocket/"; // don't forget leading and trailing "/" !!!
+const char* ws_baseurl            = "/esp-websocket"; // don't forget leading "/" !!!
 
 bool sample = false;
 int blink = 0;
@@ -58,10 +58,8 @@ long b1_t = 0;
 long b2_t = 0;
 
 // VARIABLES
-
-WebSocketsClient webSocket;
-
-Stomp::StompClient stomper(webSocket, ws_host, ws_port, ws_baseurl, true);
+websockets::WebsocketsClient client;
+Stomp::StompClient stomper(client, ws_host, ws_port, ws_baseurl);
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -159,7 +157,7 @@ void takeSample() {
 
 
 void loop() {
-  webSocket.loop();
+  stomper.loop();
   blinker();
   takeSample();
 }
