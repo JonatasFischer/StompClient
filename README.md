@@ -1,5 +1,5 @@
 # StompClient
-A STOMP client library for use with Arduino ESP8266 and Websockets
+A STOMP client library for use with Arduino ESP8266 and ArduinoWebsockets
 
 # Description
 Small library to allow devices which can run the ArduinoWebsockets library (https://github.com/gilmaimon/ArduinoWebsockets.git) to 
