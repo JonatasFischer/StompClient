@@ -13,7 +13,7 @@ The examples have been tested using the https://github.com/dmcintyre-pivotal/ESP
 
 # Fork Observations
 This is a Fork of the original project in order to change the WebSocket library and make it work with SockJS and normal 
-WebSokects.
+WebSockets.
 In order to use SockJS version just define USE_SOCK_JS before including the library
 Ex:
 #define USE_SOCK_JS  
