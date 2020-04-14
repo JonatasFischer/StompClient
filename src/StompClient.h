@@ -17,7 +17,6 @@
 
 #include "Stomp.h"
 #include "StompCommandParser.h"
-#include <ArduinoWebsockets.h>
 
 namespace Stomp {
 
@@ -128,8 +127,12 @@ class StompClient {
      * @param message StompCommand - The message being acknowledged
      */
     void ack(StompCommand message) {
-      String msg[2] = { "ACK", "id:" + message.headers.getValue("ack") };
-      _send(msg, 2);
+      String ack = message.headers.getValue("ack");
+      if(!ack.isEmpty()){
+        String msg[2] = { "ACK", "id:" + ack };
+        _send(msg, 2);
+      }
+      
     }
 
     /**
@@ -137,8 +140,11 @@ class StompClient {
      * @param message StompCommand - The message being rejected
      */
     void nack(StompCommand message) {
-      String msg[2] = { "NACK", "id:" + message.headers.getValue("ack") };
-      _send(msg, 2);
+      String nack = message.headers.getValue("ack");
+      if(!nack.isEmpty()){
+        String msg[2] = { "NACK", "id:" + nack };
+        _send(msg, 2);
+      }
     }
 
     void disconnect() {
@@ -167,7 +173,7 @@ class StompClient {
                 _lastHeartbeat = millis();
 #ifdef USE_SOCK_JS
                 String msg = "[\"\\n\"]";
-                Serial.println("StompClient::_controlHeartbeat - Sending heartbeat => " + msg);
+                DEBUG_STOMP_CLIENT("StompClient::_controlHeartbeat - Sending heartbeat => " + msg);
                 _wsClient.send(msg.c_str(), msg.length() + 1);
 #else
                 _wsClient.send("\n", 1);
@@ -237,8 +243,7 @@ class StompClient {
 
     void _onMessageCallback(websockets::WebsocketsMessage msg) {
         String payload = msg.data();
-
-        Serial.println("WStype_TEXT");
+        DEBUG_STOMP_CLIENT("[STOMP] Client:_onMessageCallback " + payload);
 
 #ifdef USE_SOCK_JS
             if (payload.startsWith("h")) {
@@ -251,24 +256,29 @@ class StompClient {
                 _handleCommand(command);
             }
 #else
-            StompCommand command = StompCommandParser::parse(payload);
-            _handleCommand(command);
+            if (payload.equals("\n")) {
+                _heartbeats++;
+            } else {
+              StompCommand command = StompCommandParser::parse(payload);
+              _handleCommand(command);
+            }
+            
 #endif
 
 
     }
 
     void _onEventsCallback(websockets::WebsocketsEvent event, String data) {
-      Serial.println("[STOMP] Client:_onEventsCallback: " + data );
+      DEBUG_STOMP_CLIENT("[STOMP] Client:_onEventsCallback: " + data );
 
       switch (event) {
         case websockets::WebsocketsEvent::ConnectionClosed:
-            Serial.println("WStype_DISCONNECTED");
+            DEBUG_STOMP_CLIENT("WStype_DISCONNECTED");
           _state = DISCONNECTED;
           break;
 
         case websockets::WebsocketsEvent::ConnectionOpened:
-            Serial.println("WStype_CONNECTED");
+            DEBUG_STOMP_CLIENT("WStype_CONNECTED");
           _connectStomp();
           break;
       }
@@ -277,13 +287,13 @@ class StompClient {
     void _connectStomp() {
       if (_state != OPENING) {
         _state = OPENING;
-        String msg[3] = { "CONNECT", "accept-version:1.1,1.0", "heart-beat:10000,10000" };
+        String msg[3] = { "CONNECT", "accept-version:1.1,1.0", "heart-beat:0,0" };
         _send(msg, 3);
       }
     }
 
     void _handleCommand(StompCommand command) {
-        Serial.println("[STOMP] Client:_handleCommand: " + command.command );
+        DEBUG_STOMP_CLIENT("[STOMP] Client:_handleCommand: " + command.command );
       if (command.command.equals("CONNECTED")) {
 
 
@@ -315,7 +325,7 @@ class StompClient {
             if((clientHeartbeat > 0) &&  (serverHeartbeat > 0)){
                 _heartbeatTimeout = (clientHeartbeat > serverHeartbeat) ? clientHeartbeat : serverHeartbeat;
             }
-            Serial.println("::_setupHeartbeat -> defined heartbeat => " + String(_heartbeatTimeout));
+            DEBUG_STOMP_CLIENT("::_setupHeartbeat -> defined heartbeat => " + String(_heartbeatTimeout));
 
         }
     }
@@ -407,7 +417,7 @@ class StompClient {
       }
       msg += "\n\0";
 #endif
-      USE_SERIAL.println(msg);
+      DEBUG_STOMP_CLIENT(msg);
 
       _wsClient.send(msg.c_str(), msg.length() + 1);
       _commandCount++;

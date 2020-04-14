@@ -1,6 +1,13 @@
 #ifndef STOMP_H
 #define STOMP_H
 
+#ifndef DEBUG_STOMP_CLIENT
+#define DEBUG_STOMP_CLIENT(...)
+#define NODEBUG_STOMP_CLIENT
+#endif
+
+
+
 #ifndef STOMP_MAX_COMMAND_HEADERS
 #define STOMP_MAX_COMMAND_HEADERS 16
 #endif
@@ -64,7 +71,7 @@ class StompHeaders {
    * Append a new header. Silently drop the header if STOMP_MAX_COMMAND_HEADERS is exceeded
    */
     void append(StompHeader h) {
-      Serial.println("StompHeader::append Key=> " + h.key + ", value => " + h.value);
+      DEBUG_STOMP_CLIENT("StompHeader::append Key=> " + h.key + ", value => " + h.value);
       _idx++;
       if (_idx+1 >= STOMP_MAX_COMMAND_HEADERS) return;
       _headers[_idx] = h;
@@ -82,9 +89,9 @@ class StompHeaders {
      * Return the value of the header with the given key
      */
     String getValue(String key) {
-        Serial.println("StompHeader::getValue Key=> " + key);
+        DEBUG_STOMP_CLIENT("StompHeader::getValue Key=> " + key);
       for (uint8_t i = 0; i <= _idx; i++) {
-          Serial.println("StompHeader::getValue _headers[" + String(i) + "].key=> " + _headers[i].key);
+          DEBUG_STOMP_CLIENT("StompHeader::getValue _headers[" + String(i) + "].key=> " + _headers[i].key);
         if (_headers[i].key.equals(key)) {
           return _headers[i].value;
         }

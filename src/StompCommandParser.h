@@ -11,7 +11,7 @@ class StompCommandParser {
   public:
 
     static StompCommand parse(String data) {
-        Serial.println("StompCommandParser::parse data => " + data);
+        DEBUG_STOMP_CLIENT("StompCommandParser::parse data => " + data);
       // command EOL
       // * (header EOL)
       // EOL
@@ -52,7 +52,7 @@ class StompCommandParser {
       }
 
       headers.trim();
-      Serial.println("StompCommandParser::parse Parsed headers => " + headers);
+      DEBUG_STOMP_CLIENT("StompCommandParser::parse Parsed headers => " + headers);
       cmd.body.trim();
 
       String header;
